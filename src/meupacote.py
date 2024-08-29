@@ -1,6 +1,6 @@
 import pandas as pd
 
-arquivo_excel = './data/EXCELCADASTRO.xlsx'
+arquivo_excel = 'data/cadastroalunos.xlsx'
 
 def carregar_dados():
     try:
@@ -8,7 +8,6 @@ def carregar_dados():
         df_disciplinas = pd.read_excel(arquivo_excel, sheet_name='disciplina', engine='openpyxl')
         df_notas = pd.read_excel(arquivo_excel, sheet_name='nota', engine='openpyxl')
 
-        # Garantir que a matrícula seja uma string e remover espaços em branco
         df_alunos['Matrícula'] = df_alunos['Matrícula'].astype(str).str.strip()
         df_disciplinas['Matrícula'] = df_disciplinas['Matrícula'].astype(str).str.strip()
         df_notas['Matrícula'] = df_notas['Matrícula'].astype(str).str.strip()
@@ -28,6 +27,11 @@ def verificar_matricula_existente(df_alunos, matricula):
     matricula = str(matricula).strip()
     return not df_alunos[df_alunos['Matrícula'] == matricula].empty
 
+def listar_matriculas(df_alunos):
+    print("\nMatrículas cadastradas:")
+    for _, row in df_alunos.iterrows():
+        print(f"Matrícula: {row['Matrícula']}, Nome: {row['Nome']}, Semestre: {row['Semestre']}")
+
 def cadastrar_alunos():
     df_alunos, df_disciplinas, df_notas = carregar_dados()
 
@@ -46,6 +50,7 @@ def cadastrar_alunos():
     ]
 
     while True:
+        listar_matriculas(df_alunos)
         matricula = input("Digite a matrícula: ")
         
         if verificar_matricula_existente(df_alunos, matricula):
@@ -97,65 +102,52 @@ def adicionar_notas():
     if df_alunos.empty:
         print("Nenhum aluno cadastrado.")
         return
-    
-    matricula = input("Digite a matrícula do aluno para adicionar nota: ")
-    aluno_existe = verificar_matricula_existente(df_alunos, matricula)
-    
-    if not aluno_existe:
-        print("Matrícula não encontrada.")
-        return
-
-    disciplinas_do_aluno = df_disciplinas[df_disciplinas['Matrícula'] == matricula]['Disciplina'].tolist()
-    
-    if not disciplinas_do_aluno:
-        print("O aluno não está matriculado em nenhuma disciplina.")
-        return
-
-    for i, disciplina in enumerate(disciplinas_do_aluno, 1):
-        print(f"{i}. {disciplina}")
 
     while True:
-        try:
-            escolha = int(input(f"Escolha a disciplina para adicionar a nota (1-{len(disciplinas_do_aluno)}): "))
-            if 1 <= escolha <= len(disciplinas_do_aluno):
-                disciplina = disciplinas_do_aluno[escolha - 1]
-                while True:
-                    try:
-                        nota = float(input(f"Digite a nota para a disciplina '{disciplina}': "))
-                        nova_nota = pd.DataFrame([{'Matrícula': matricula, 'Disciplina': disciplina, 'Nota': nota}])
-                        df_notas = pd.concat([df_notas, nova_nota], ignore_index=True)
-                        print(f"Nota adicionada para {disciplina}.")
-                        salvar_dados(df_alunos, df_disciplinas, df_notas)
-                        break
-                    except ValueError:
-                        print("Nota inválida. Por favor, insira um número.")
-                break
-            else:
-                print(f"Escolha inválida. Por favor, selecione um número entre 1 e {len(disciplinas_do_aluno)}.")
-        except ValueError:
-            print("Entrada inválida. Por favor, insira um número.")
+        listar_matriculas(df_alunos)
+        matricula = input("Digite a matrícula do aluno para adicionar nota: ")
+        aluno_existe = verificar_matricula_existente(df_alunos, matricula)
+        
+        if not aluno_existe:
+            resposta = input("Matrícula não encontrada. Deseja tentar novamente? (s/n): ").lower()
+            if resposta != 's':
+                return
+            continue
 
-def visualizar_notas():
-    df_alunos, df_disciplinas, df_notas = carregar_dados()
-    
-    if df_alunos.empty:
-        print("Nenhum aluno cadastrado.")
-        return
-    
-    matricula = input("Digite a matrícula do aluno para visualizar as notas: ")
-    aluno_existe = verificar_matricula_existente(df_alunos, matricula)
-    
-    if not aluno_existe:
-        print("Matrícula não encontrada.")
-        return
-    
-    notas_do_aluno = df_notas[df_notas['Matrícula'] == matricula]
-    
-    if notas_do_aluno.empty:
-        print(f"O aluno de matrícula {matricula} não possui notas cadastradas.")
-        return
-    
-    print(f"Notas do aluno de matrícula {matricula}:")
-    for _, row in notas_do_aluno.iterrows():
-        print(f"{row['Disciplina']}: {row['Nota']}")
+        disciplinas_do_aluno = df_disciplinas[df_disciplinas['Matrícula'] == matricula]['Disciplina'].tolist()
+        
+        if not disciplinas_do_aluno:
+            print("O aluno não está matriculado em nenhuma disciplina.")
+            return
+
+        for i, disciplina in enumerate(disciplinas_do_aluno, 1):
+            print(f"{i}. {disciplina}")
+
+        while True:
+            try:
+                escolha = int(input(f"Escolha a disciplina para adicionar a nota (1-{len(disciplinas_do_aluno)}): "))
+                if 1 <= escolha <= len(disciplinas_do_aluno):
+                    disciplina = disciplinas_do_aluno[escolha - 1]
+                    if disciplina == "Matéria vaga":
+                        print("Não é possível adicionar nota para 'Matéria vaga'.")
+                        break
+                    while True:
+                        try:
+                            nota = float(input(f"Digite a nota para a disciplina '{disciplina}': "))
+                            nova_nota = pd.DataFrame([{'Matrícula': matricula, 'Disciplina': disciplina, 'Nota': nota}])
+
+                            # Filtrar entradas vazias
+                            nova_nota = nova_nota.dropna(how='all')
+
+                            df_notas = pd.concat([df_notas, nova_nota], ignore_index=True)
+                            print(f"Nota adicionada para {disciplina}.")
+                            salvar_dados(df_alunos, df_disciplinas, df_notas)
+                            break
+                        except ValueError:
+                            print("Nota inválida. Por favor, insira um número.")
+                    break
+                else:
+                    print(f"Escolha inválida. Por favor, selecione um número entre 1 e {len(disciplinas_do_aluno)}.")
+            except ValueError:
+                print("Entrada inválida. Por favor, insira um número.")
 
