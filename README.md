@@ -1,20 +1,60 @@
-# Projeto de Cadastro de Alunos - IBMEC
+# Sistema de Cadastro e Notas de Alunos - IBMEC
 
-Este projeto é uma aplicação de cadastro de alunos desenvolvida em Python, com integração para visualização de notas e gráficos. Ele permite o cadastro de alunos, adição de notas e visualização das notas em gráficos.
+Este projeto consiste em um sistema para gerenciar o cadastro de alunos, disciplinas e notas, com funcionalidades adicionais de visualização de gráficos e envio de emails com relatórios de notas.
+
+## Funcionalidades
+
+### Cadastro de Alunos:
+- Permite o cadastro de novos alunos, incluindo informações como matrícula, nome, semestre e email.
+- Verifica se a matrícula já está cadastrada.
+
+### Cadastro de Disciplinas:
+- Permite a escolha de até 5 disciplinas para cada aluno.
+
+### Registro de Notas:
+- Permite o registro das notas para as disciplinas cadastradas para cada aluno.
+- Atualiza o status de aprovação baseado na nota (Aprovado/Reprovado).
+
+### Visualização de Notas:
+- Gera gráficos de barras das notas de um aluno específico.
+- Gera gráficos com as notas de todos os alunos em uma disciplina específica.
+
+### Envio de Emails:
+- Envia um email para o aluno com um relatório das suas notas e um gráfico de desempenho em anexo.
 
 ## Estrutura do Projeto
-
-O projeto é dividido em três arquivos principais:
-
-1. **`main.py`**: Contém o menu principal e a lógica de controle do programa.
-2. **`meupacote.py`**: Gerencia o carregamento e salvamento dos dados do Excel, além de funcionalidades para cadastro de alunos e adição de notas.
-3. **`graficos.py`**: Responsável pela geração de gráficos das notas dos alunos e notas por matéria.
+- **main.py**: Arquivo principal que contém o menu interativo e a lógica principal do programa.
+- **alunos.py**: Contém as funções relacionadas ao cadastro e gerenciamento de alunos.
+- **notas.py**: Contém as funções para adicionar e gerenciar notas.
+- **visualizacao.py**: Contém as funções para gerar e exibir gráficos das notas.
+- **dados.py**: Contém as funções para carregar e salvar os dados no arquivo Excel.
+- **cadastroalunos.xlsx**: Arquivo Excel utilizado como "banco de dados" para armazenar as informações dos alunos, disciplinas e notas.
 
 ## Requisitos
+- Python 3.x
+- Bibliotecas Python:
+  - pandas
+  - openpyxl
+  - matplotlib
+  - smtplib (para envio de emails)
+  - os e dotenv (para gerenciar variáveis de ambiente)
 
-Certifique-se de que você tenha as bibliotecas Python necessárias instaladas. Para instalar todas as dependências, utilize o arquivo `requirements.txt` incluído no projeto.
+## Como Usar
 
-Para instalar os requisitos, execute o seguinte comando:
+### Clonar o Repositório
 
-```sh
+```bash
+git clone https://github.com/seu-usuario/seu-repositorio.git
+cd seu-repositori
+
+#Instalar as Dependências
 pip install -r requirements.txt
+
+
+###Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
+YAHOO_USER="seu_email@yahoo.com"
+YAHOO_PASSWORD="sua_senha_de_aplicativo"
+
+
+#Nota: No Yahoo, é necessário gerar uma senha de aplicativo para permitir que o script envie emails
+
